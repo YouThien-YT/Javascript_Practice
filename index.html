@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+</head>
+<body>
+    <script src="main.js"></script>
+
+    <div class="main">
+        <form action="" class="form" id="form_1">
+            <h1 class="heading">Thanh vien dang ky</h1>
+            <p class="desc">cung nhau hoc lap trinh mien phi tai F8 ❤️ </p>
+            <div class="spacer"></div>
+
+            <div class="from_group">
+                <label for="fullname" class="from_lable">Ten day du</label>
+                <input id="fullname" type="text" class="from_control" placeholder="VD: You Thien">
+                <span class="from_message"></span>
+            </div>
+
+            <div class="from_group">
+                <label for="email" class="from_lable">Email</label>
+                <input id="email" type="text" class="from_control" placeholder="VD: abc@gmail.com">
+                <span class="from_message"></span>
+            </div>
+
+            <div class="from_group">
+                <label for="Password" class="from_lable">Password</label>
+                <input id="Password" type="text" class="from_control" placeholder="nhap Password">
+                <span class="from_message"></span>
+            </div>
+
+            <div class="from_group">
+                <label for="Password_confilmation" class="from_lable">Enter the Password</label>
+                <input id="Password_confilmation" type="text" class="from_control" placeholder="nhap lai Password">
+                <span class="from_message"></span>
+            </div>
+
+            <button class="from_submit">Dang ky</button>
+        </form>        
+    </div>
+
+    <script>
+        validator({
+            form: '#form_1',
+            errorMessage: '.from_message',
+            rules: [
+                validator.isRequestName('#fullname',),
+                validator.isRequestName('#email'),
+                validator.isRequestEmail('#email'),
+                validator.isRequestPassword('#Password',5),
+                validator.isRequestName('#Password_confilmation',),
+                validator.isComfirmPassword('#Password_confilmation',function(){
+                    return document.querySelector('#form_1 #Password').value;
+                },'password nhập chưa chính xác'),
+            ]
+        })
+    </script>
+
+</body>
+</html>
+
