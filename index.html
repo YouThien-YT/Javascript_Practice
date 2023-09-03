@@ -13,27 +13,77 @@
             <p class="desc">cung nhau hoc lap trinh mien phi tai F8 ❤️ </p>
             <div class="spacer"></div>
 
-            <div class="from_group">
+            <div class="form_group">
                 <label for="fullname" class="from_lable">Ten day du</label>
-                <input id="fullname" type="text" class="from_control" placeholder="VD: You Thien">
+                <input id="fullname" name="fullname" type="text" class="from_control" placeholder="VD: You Thien">
                 <span class="from_message"></span>
             </div>
 
-            <div class="from_group">
+            <div class="form_group">
                 <label for="email" class="from_lable">Email</label>
-                <input id="email" type="text" class="from_control" placeholder="VD: abc@gmail.com">
+                <input id="email" name="email" type="text" class="from_control" placeholder="VD: abc@gmail.com">
                 <span class="from_message"></span>
             </div>
 
-            <div class="from_group">
+            <div class="form_group">
                 <label for="Password" class="from_lable">Password</label>
-                <input id="Password" type="text" class="from_control" placeholder="nhap Password">
+                <input id="Password" name="Password" type="text" class="from_control" placeholder="nhap Password">
                 <span class="from_message"></span>
             </div>
 
-            <div class="from_group">
+            <div class="form_group">
                 <label for="Password_confilmation" class="from_lable">Enter the Password</label>
-                <input id="Password_confilmation" type="text" class="from_control" placeholder="nhap lai Password">
+                <input id="Password_confilmation" name="Password_confilmation" type="text" class="from_control" placeholder="nhap lai Password">
+                <span class="from_message"></span>
+            </div>
+
+            <div class="form_group">
+                <label for="avatar" class="from_lable">anh dai dien</label>
+                <input id="avatar" name="avatar" type="file" class="from_control">
+                <span class="from_message"></span>
+            </div>
+
+            <div class="form_group">
+                <label for="province" class="from_lable">Tinh/TP</label>
+                <select id="province" name="province" class="from_control">
+                    <option value="">--Chon Tinh/TP--</option>
+                    <option value="hcm">TP.HCM</option>
+                    <option value="qn">Qang Ngai</option>
+                </select>
+                <span class="from_message"></span>
+            </div>
+
+            <div class="form_group">
+                <label for="Password_confilmation" class="from_lable">Giới tính</label>
+                <div>
+                    <input name="gender" type="radio" class="from_control" value="male">
+                    nam
+                </div>
+                <div>
+                    <input name="gender" type="radio" class="from_control" value="female">
+                    nữ
+                </div>
+                <div>
+                    <input name="gender" type="radio" class="from_control" value="lgpt">
+                    khác
+                </div>
+                <span class="from_message"></span>
+            </div>
+
+            <div class="form_group">
+                <label for="Password_confilmation" class="from_lable">Nghe nghiep</label>
+                <div>
+                    <input name="job" type="checkbox" class="from_control" value="hs">
+                    hoc sinh
+                </div>
+                <div>
+                    <input name="job" type="checkbox" class="from_control" value="sv">
+                    sinh vien
+                </div>
+                <div>
+                    <input name="job" type="checkbox" class="from_control" value="td">
+                    tu do
+                </div>
                 <span class="from_message"></span>
             </div>
 
@@ -44,17 +94,25 @@
     <script>
         validator({
             form: '#form_1',
+            formGroupSelector: '.form_group',
             errorMessage: '.from_message',
             rules: [
-                validator.isRequestName('#fullname',),
-                validator.isRequestName('#email'),
-                validator.isRequestEmail('#email'),
-                validator.isRequestPassword('#Password',5),
-                validator.isRequestName('#Password_confilmation',),
-                validator.isComfirmPassword('#Password_confilmation',function(){
-                    return document.querySelector('#form_1 #Password').value;
-                },'password nhập chưa chính xác'),
-            ]
+                // validator.isRequestName('#fullname'),
+                // validator.isRequestName('#email'),
+                // validator.isRequestEmail('#email'),
+                // validator.isRequestPassword('#Password',5),
+                // validator.isRequestName('#Password_confilmation'),
+                // validator.isConfirmPassword('#Password_confilmation',function(){
+                //     return document.querySelector('#form_1 #Password').value;
+                // },'password nhập chưa chính xác'),
+                validator.isRequestName('#avatar'),
+                validator.isRequestName('#province'),
+                validator.isRequestName('input[name="gender"]'),
+                validator.isRequestName('input[name="job"]'),
+            ],
+            onsubmit: function(data){
+                console.log(data);
+            }
         })
     </script>
 

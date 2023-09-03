@@ -136,19 +136,40 @@ for(var i=0; i < h1Elements.length; i++){
 // khoi tao ham xac nhan
 function validator(option){
 
-   var selectorRules = {};
+   function getParent (element, selector){
+      while ( element.parentElement )
+      {
+         if ( element.parentElement.matches(selector)){
+            return element.parentElement;
+         }
+         element = element.parentElement;
+      }
+   }
 
    function thongBaoError (inputElement,rule){
-      var errorElement = inputElement.parentElement.querySelector(option.errorMessage)
-      var messageError = rule.check(inputElement.value)
+      // var errorElement = ;
+      var errorElement = getParent(inputElement, option.formGroupSelector).querySelector(option.errorMessage);
+      // var messageError = rule.check(inputElement.value);
 
       // lấy tất cả các rules của từng select
       var rules = selectorRules[rule.select]
 
-      // lập qua từng rule trong rules của select và check 
-      // nếu gặp lỗi là dừng ngay
+      /* lập qua từng rule trong rules của select và check 
+         nếu gặp lỗi là dừng ngay*/
       for( var i = 0; i < rules.length; ++i ){
-         messageError = rules[i](inputElement.value)
+
+         switch (inputElement.type){
+            case 'radio':
+            case 'checkbox':
+               messageError = rules[i](
+                  formElement.querySelector(rule.select + ':checked')
+               );
+      
+               break;
+            default:
+               messageError = rules[i](inputElement.value);
+         }
+
          if(messageError){
             break;
          }
@@ -160,47 +181,100 @@ function validator(option){
       else{
        errorElement.innerText = ''
       }
+      return !messageError ;
    }
+   
 // lấy element của form cần validate
   var formElement = document.querySelector(option.form);
 
-  if(formElement)
-  {
-   formElement.onsubmit = function(e){
-      e.preventDefault();
-      option.rules.forEach(function(rule){
-         var inputElement = formElement.querySelector(rule.select);
-         thongBaoError(inputElement,rule);
-      });
-   }
-   // lăp qua mỗi rule và xữ lý các sự kiện lắng nghe (blur,input,...)
-   option.rules.forEach(function(rule){
+  if(formElement) {
       
-      // lưu lại các rules cho mỗi input 
-      if(Array.isArray(selectorRules[rule.select])){
-         selectorRules[rule.select].push(rule.check);
-      }
-      else{
-         selectorRules[rule.select] = [rule.check];
-      }
-
-      var inputElement = formElement.querySelector(rule.select)
-
-      if(inputElement)
-      {
-         // xu ly khi blur
-         inputElement.onblur = function() {
-            thongBaoError(inputElement,rule);
+      var selectorRules = {};
+      
+      // lăp qua mỗi rule và xữ lý các sự kiện lắng nghe (blur,input,...)
+      option.rules.forEach(function(rule){
+         
+         // lưu lại các rules cho mỗi input 
+         if( Array.isArray(selectorRules[rule.select]) ) {
+            selectorRules[rule.select].push(rule.check);
          }
-         // xu ly khi nhap
-         inputElement.oninput = function() {
-            var errorElement = inputElement.parentElement.querySelector(option.errorMessage);
-            errorElement.innerText = ''
+         else{
+            selectorRules[rule.select] = [rule.check];
+         }
+
+         var inputElements = formElement.querySelectorAll(rule.select)
+
+         Array.from(inputElements).forEach( function(inputElement) {
+            
+            // xu ly khi blur
+            inputElement.onblur = function() {
+               thongBaoError(inputElement,rule);
+            }
+            // xu ly khi nhap
+            inputElement.oninput = function() {
+               var errorElement = getParent(inputElement, option.formGroupSelector).querySelector(option.errorMessage);
+               errorElement.innerText = ''
+            }
+         })
+      })
+
+      // khi submit form
+      formElement.onsubmit = function(e){
+         e.preventDefault();
+
+         var flagErrorForm = true ;
+
+         // lặp qua từng rules và validator
+         option.rules.forEach(function(rule){
+            var inputElement = formElement.querySelector(rule.select);
+            var flagError = thongBaoError(inputElement,rule);
+
+            if (!flagError){
+               flagErrorForm = false;
+            }
+         });
+
+         if (flagErrorForm){
+
+            // truong hop submit voi javasrcipt
+            if(typeof option.onsubmit === 'function' ){
+
+               var enableInputs = formElement.querySelectorAll('[name]:not([disabled])');
+               var formValues = Array.from(enableInputs).reduce(function (values, input) {
+
+                  switch (input.type){
+                     case 'radio':
+                        values[input.name] = formElement.querySelector('input[name="' + input.name + '"]:checked').value;
+                        break;
+                     case 'checkbox':
+                        if( !input.matches(':checked') ) {
+                           // values[input.name] = '1';
+                           return values;
+                        }
+                        if( !Array.isArray(values[input.name]) ) {
+                           values[input.name] = [];
+                        }
+                        values[input.name].push(input.value);
+                        break;
+                     case 'file':
+                        values[input.name] = input.files;
+                        break;
+                     default:
+                        values[input.name] = input.value;
+                  }
+
+                  return values;
+               }, {} );
+               option.onsubmit(formValues)
+            }
+            // truong hop submit voi html mac dinh
+            else {
+               formElement.submit();
+            }
          }
       }
 
-   })
-}
+   }
 }
 
 // khoi tao cac rules
@@ -208,7 +282,7 @@ validator.isRequestName = function(selector,message) {
    return {
       select: selector,
       check: function (value) {
-         return value.trim() ? undefined : message || 'Vui long nhap name' 
+         return value ? undefined : message || 'Vui long nhap name' 
       } 
    };
 }
@@ -232,11 +306,26 @@ validator.isRequestPassword = function(selector, min,message) {
   };
 }
 
-validator.isComfirmPassword = function(selector,getComfirmPassword,message){
+validator.isConfirmPassword = function(selector,getConfirmPassword,message){
    return {
       select: selector,
       check: function(value){
-         return value === getComfirmPassword() ? undefined : message || 'Gia tri nhap vao chua chinh xac'
+         return value === getConfirmPassword() ? undefined : message || 'Gia tri nhap vao chua chinh xac'
       }
    }
 }
+
+// =================================== JSON ================================
+
+//  1. stringify : tu javascript -> json
+//  2. parse : tuwf json -> javascript
+
+
+// ================================= Promise ================================
+
+var promise = new Promise(
+   // Executor
+   function(resolve, reject){
+
+   }
+)
